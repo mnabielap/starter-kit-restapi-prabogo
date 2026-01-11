@@ -10,3 +10,6 @@ etc
 cover 
 cover.out
 .DS_Store
+
+**/__pycache__
+**api_tests/*.json

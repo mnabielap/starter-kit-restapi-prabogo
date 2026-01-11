@@ -27,12 +27,9 @@ func (h *authAdapter) Register(a any) error {
 		return c.Status(fiber.StatusBadRequest).JSON(model.Response{Success: false, Error: err.Error()})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(model.Response{
-		Success: true,
-		Data: fiber.Map{
-			"user":   user,
-			"tokens": tokens,
-		},
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"user":   user,
+		"tokens": tokens,
 	})
 }
 
@@ -51,12 +48,9 @@ func (h *authAdapter) Login(a any) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(model.Response{Success: false, Error: err.Error()})
 	}
 
-	return c.JSON(model.Response{
-		Success: true,
-		Data: fiber.Map{
-			"user":   user,
-			"tokens": tokens,
-		},
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"user":   user,
+		"tokens": tokens,
 	})
 }
 
@@ -74,7 +68,7 @@ func (h *authAdapter) RefreshToken(a any) error {
 		return c.Status(fiber.StatusUnauthorized).JSON(model.Response{Success: false, Error: err.Error()})
 	}
 
-	return c.JSON(model.Response{Success: true, Data: tokens})
+	return c.JSON(tokens)
 }
 
 func (h *authAdapter) Logout(a any) error {

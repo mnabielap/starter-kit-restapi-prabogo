@@ -1,201 +1,180 @@
-# Prabogo
+# 🚀 Prabogo: Hexagonal Go REST API Starter Kit
 
-![Alt text](./design-docs/images/icon.png "Prabogo Icon")
+[![Go Version](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat&logo=go)](https://golang.org/doc/devel/release.html)
+[![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-purple)](https://alistair.cockburn.us/hexagonal-architecture/)
+[![Framework](https://img.shields.io/badge/Framework-Fiber-black)](https://gofiber.io/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**Prabogo** is a Go framework designed to simplify project development by providing an interactive command interface and built-in instructions for AI assistance. This framework streamlines common engineering tasks, making it easier for software engineers to scaffold, generate, and manage project components efficiently. With Prabogo, developers benefit from automation and intelligent guidance, accelerating the software development process.
+**Prabogo** is a robust, production-ready Go framework designed to simplify project development using **Hexagonal Architecture** (Ports and Adapters). It provides an interactive command interface, built-in AI assistance instructions, and a suite of pre-configured tools for modern web development.
 
-## Design Docs
+---
 
-[Design Docs List](./design-docs)
+## ✨ Key Features
 
-## Requirement
+- **🏗 Hexagonal Architecture**: Clean separation between Domain, Ports, and Adapters.
+- **⚡ High Performance**: Built on top of **Fiber** (Fastest Go HTTP engine).
+- **🔐 Advanced Authentication**:
+  - JWT Access & Refresh Token rotation.
+  - Role-Based Access Control (**RBAC**) (Admin vs User).
+  - Password Reset & Email Verification flows.
+- **💾 Database & SQL**:
+  - **PostgreSQL** integration.
+  - **Goqu** for type-safe, fluent SQL query building (No heavy ORM).
+  - Auto-migrations via **Goose**.
+- **🐇 Event Driven**: RabbitMQ integration for asynchronous messaging.
+- **⚡ Caching**: Redis integration for high-speed data access.
+- **🛠 Code Generation**: Powerful `Makefile` to generate Models, Adapters, and Ports instantly.
+- **🧪 Automated Testing**: Python-based API test suite included (No Postman needed!).
 
-1. go version >= go1.23.0
+---
 
-**Before running the app, copy the example environment file:**
+## 📂 Project Structure
 
-```sh
-cp .env.example .env
+```text
+starter-kit-restapi-prabogo/
+├── cmd/                    # Application entry point
+├── internal/
+│   ├── domain/             # Core Business Logic (User, Auth, Client)
+│   ├── model/              # Data Structures / Entities
+│   ├── port/               # Interfaces (Inbound/Outbound)
+│   ├── adapter/            # Implementations (Fiber, Postgres, Redis, etc.)
+│   └── migration/          # Database migration scripts
+├── utils/                  # Shared utilities (JWT, Password, Logger)
+├── api_tests/              # Python automated test scripts
+├── docker-compose.yml      # Docker orchestration
+├── Makefile                # Command runner and code generator
+└── README.md               # Documentation
 ```
 
-## Start External Services with Docker Compose
+---
 
-```sh
-docker-compose up -d
+## ⚙️ Configuration
+
+Before running the application (Local or Docker), you **must** configure your environment variables.
+
+1. Copy the example file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and fill in your details. **Crucial variables for Auth:**
+
+   ```properties
+   # Server
+   SERVER_PORT=8000
+   APP_MODE=debug
+
+   # Security
+   INTERNAL_KEY=your_secure_internal_key
+   JWT_SECRET=change_this_to_a_super_secure_secret
+   JWT_ACCESS_EXPIRATION_MINUTES=30
+   JWT_REFRESH_EXPIRATION_DAYS=30
+
+   # Database
+   DATABASE_HOST=localhost   # Use 'postgres' if running inside Docker
+   DATABASE_USER=prabogo
+   DATABASE_PASSWORD=changeme
+   DATABASE_NAME=prabogo
+
+   # SMTP (Email)
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_USERNAME=user@example.com
+   SMTP_PASSWORD=password
+   ```
+
+---
+
+## 🐳 Running with Docker (Recommended)
+
+This is the easiest way to get started. You do not need Go or PostgreSQL installed on your machine.
+
+### 1. Load Environment Variables
+Docker Compose automatically loads variables from your `.env` file. **Ensure your `.env` file exists** (see Configuration section).
+
+> **Note:** Inside `.env`, set `DATABASE_HOST=postgres`, `CACHE_HOST=redis`, and `MESSAGE_HOST=rabbitmq` so the container can find the services.
+
+### 2. Start Services
+Build and start the containers in the background:
+```bash
+docker-compose up -d --build
 ```
 
-## Stop External Services with Docker Compose
+### 🛠 Docker Management Commands
 
-```sh
-docker-compose down
+Here is a cheat sheet for managing your Docker environment:
+
+| Action | Command |
+| :--- | :--- |
+| **👀 View Logs** | `docker-compose logs -f app` |
+| **🛑 Stop Containers** | `docker-compose stop` |
+| **▶️ Start Containers** | `docker-compose start` |
+| **♻️ Restart App** | `docker-compose restart app` |
+| **🗑 Remove Containers** | `docker-compose down` (Stops and removes containers & networks) |
+| **📦 List Volumes** | `docker volume ls` |
+| **⚠️ Delete Volumes** | `docker-compose down -v` <br>*(WARNING: Permanently deletes database data!)* |
+
+---
+
+## 🧪 API Testing (Python Suite)
+
+Forget manual Postman collections! This project comes with a comprehensive **Python Test Suite** located in `api_tests/`.
+
+### Prerequisites
+*   Python 3.x
+*   `requests` library (`pip install requests`)
+
+### How to Run Tests
+Navigate to the `api_tests` folder and run the scripts sequentially. They automatically handle token management (saving tokens to `secrets.json`).
+
+**1. Authentication Tests**
+```bash
+# Register a new user
+python api_tests/A1.auth_register.py
+
+# Login (Saves tokens)
+python api_tests/A2.auth_login.py
+
+# Refresh Token
+python api_tests/A3.auth_refresh.py
 ```
 
-## Start Authentik Services with Docker Compose
+---
 
-To start Authentik authentication services (includes PostgreSQL, Redis, Server, and Worker):
+## 🛠 Makefile & Code Generation
 
-```sh
-docker-compose -f docker-compose.authentik.yml up -d
-```
+Prabogo features an interactive CLI for generating boilerplate code, keeping your Hexagonal Architecture clean.
 
-## Stop Authentik Services with Docker Compose
-
-```sh
-docker-compose -f docker-compose.authentik.yml down
-```
-
-## Run App in Development Mode
-
-To run the application directly (without Makefile or Docker), ensure all required environment variables are set. You can use a `.env` file or export them manually.
-
-Start the app with:
-
-```sh
-go run cmd/main.go <option>
-```
-
-Replace `<option>` with any command-line arguments your application supports. For example:
-
-```sh
-go run cmd/main.go http
-```
-
-Make sure external dependencies (such as PostgreSQL, RabbitMQ, and Redis) are running, either via Docker Compose or another method.
-
-## Makefile Commands
-
-The project includes a comprehensive Makefile with various helpful commands for code generation and development tasks.
-
-### Interactive Command Runner
-
-![Alt text](./design-docs/images/option.gif "Option")
-
-You can use the interactive target selector to choose and run Makefile targets:
-
-```sh
+### Interactive Mode
+Simply run:
+```bash
 make run
 ```
+*Select an option from the menu to generate models, adapters, or migrations.*
 
-This will display an interactive menu to select a Makefile target and will prompt for any required parameters. The selector works in two modes:
+### Direct Commands
+*   **Generate Model:** `make model VAL=product`
+*   **Generate Migration:** `make migration-postgres VAL=add_product_table`
+*   **Generate Handler (Fiber):** `make inbound-http-fiber VAL=product`
+*   **Generate Repository (Postgres):** `make outbound-database-postgres VAL=product`
 
-1. If `fzf` is installed: Uses a fuzzy-search interactive selector (recommended for best experience)
-2. If `fzf` is not available: Falls back to a basic numbered menu selection
+---
 
-To install `fzf` (optional):
-- macOS: `brew install fzf`
-- Linux: `apt install fzf` (Ubuntu/Debian) or `dnf install fzf` (Fedora)
-- Windows: With chocolatey: `choco install fzf` or with WSL, follow Linux instructions
+## 🛡 Security Features
 
-### Common Makefile Targets
+*   **Role-Based Access Control (RBAC):** Middleware ensures only users with `role: admin` can perform sensitive operations.
+*   **Argon2/Bcrypt:** Password hashing implementation (via `utils/password`).
+*   **JWT Security:** Short-lived Access Tokens and long-lived Refresh Tokens.
+*   **Input Validation:** Strict struct validation on all incoming requests.
 
-#### Code Generation Targets
+---
 
-- `model`: Creates a model/entity with necessary structures (requires VAL parameter)
-  ```sh
-  make model VAL=name
-  ```
-
-- `migration-postgres`: Creates a PostgreSQL migration file (requires VAL parameter)
-  ```sh
-  make migration-postgres VAL=name
-  ```
-
-- `inbound-http-fiber`: Creates HTTP handlers using Fiber framework (requires VAL parameter)
-  ```sh
-  make inbound-http-fiber VAL=name
-  ```
-
-- `inbound-message-rabbitmq`: Creates RabbitMQ message consumers (requires VAL parameter)
-  ```sh
-  make inbound-message-rabbitmq VAL=name
-  ```
-
-- `inbound-command`: Creates command line interface handlers (requires VAL parameter)
-  ```sh
-  make inbound-command VAL=name
-  ```
-
-- `outbound-database-postgres`: Creates PostgreSQL database adapter (requires VAL parameter)
-  ```sh
-  make outbound-database-postgres VAL=name
-  ```
-
-- `outbound-http`: Creates HTTP adapter (requires VAL parameter)
-  ```sh
-  make outbound-http VAL=name
-  ```
-
-- `outbound-message-rabbitmq`: Creates RabbitMQ message adapter (requires VAL parameter)
-  ```sh
-  make outbound-message-rabbitmq VAL=name
-  ```
-
-- `outbound-cache-redis`: Creates Redis cache adapter (requires VAL parameter)
-  ```sh
-  make outbound-cache-redis VAL=name
-  ```
-
-- `generate-mocks`: Generates mock implementations from all go:generate directives in registry files
-  ```sh
-  make generate-mocks
-  ```
-
-#### Runtime Targets
-
-- `build`: Builds the Docker image for the application
-  ```sh
-  make build
-  # Force rebuild regardless of existing image:
-  make build BUILD=true
-  ```
-
-- `http`: Runs the application in HTTP server mode inside Docker
-  ```sh
-  make http
-  # Force rebuild before running:
-  make http BUILD=true
-  ```
-
-- `message`: Runs the application in message consumer mode inside Docker (requires SUB parameter)
-  ```sh
-  make message SUB=upsert_client
-  # Force rebuild before running:
-  make message SUB=upsert_client BUILD=true
-  ```
-
-- `command`: Executes a specific command in the application (requires CMD and VAL parameters)
-  ```sh
-  make command CMD=publish_upsert_client VAL=name
-  # Force rebuild before running:
-  make command CMD=publish_upsert_client VAL=name BUILD=true
-  ```
-
-## Running test suite
-
-### Unit tests
-
-```sh
-go test -cover ./internal/domain/...
-```
-
-To generate coverage report:
-
-```sh
-go test -coverprofile=coverage.profile -cover ./internal/domain/...
-go tool cover -html coverage.profile -o coverage.html
-```
-
-Coverage report will be available at `coverage.html`
-
-To check intermittent test failure due to mock. when in doubt, use `-t 1000`
-```sh
-retry -d 0 -t 100 -u fail -- go test -coverprofile=coverage.profile -cover ./internal/domain/... -count=1
-```
-
-## License
+## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Author
+---
 
-Moch Dieqy Dzulqaidar
+<p align="center">
+  Built with ❤️ by <b>Moch Dieqy Dzulqaidar</b>
+</p>
