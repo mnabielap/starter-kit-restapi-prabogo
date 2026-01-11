@@ -175,5 +175,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  Built with ❤️ by <b>Moch Dieqy Dzulqaidar</b>
+  Built with ❤️ by <b><a href="https://github.com/mochdieqy">Moch Dieqy Dzulqaidar</a></b> & <b><a href="https://github.com/mnabielap">Muhammad Nabiel Andityo</a></b>
 </p>
