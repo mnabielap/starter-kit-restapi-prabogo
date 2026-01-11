@@ -27,6 +27,7 @@ import (
 	"prabogo/utils/log"
 	"prabogo/utils/rabbitmq"
 	"prabogo/utils/redis"
+	smtp_outbound_adapter "prabogo/internal/adapter/outbound/smtp"
 )
 
 var databaseDriverList = []string{"postgres"}
@@ -53,10 +54,14 @@ func NewApp() *App {
 	outboundCacheDriver = os.Getenv("OUTBOUND_CACHE_DRIVER")
 	inboundHttpDriver = os.Getenv("INBOUND_HTTP_DRIVER")
 	inboundMessageDriver = os.Getenv("INBOUND_MESSAGE_DRIVER")
+
+	emailAdapter := smtp_outbound_adapter.NewAdapter()
+
 	domain := domain.NewDomain(
 		databaseOutbound(ctx),
 		messageOutbound(ctx),
 		cacheOutbound(ctx),
+		emailAdapter,
 	)
 
 	return &App{

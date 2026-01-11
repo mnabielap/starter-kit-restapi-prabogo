@@ -70,3 +70,17 @@ func (s *adapter) Client() outbound_port.ClientDatabasePort {
 	}
 	return NewClientAdapter(s.db)
 }
+
+func (s *adapter) User() outbound_port.UserDatabasePort {
+	if s.dbexecutor != nil {
+		return NewUserAdapter(s.dbexecutor)
+	}
+	return NewUserAdapter(s.db)
+}
+
+func (s *adapter) Token() outbound_port.TokenDatabasePort {
+	if s.dbexecutor != nil {
+		return NewTokenAdapter(s.dbexecutor)
+	}
+	return NewTokenAdapter(s.db)
+}
