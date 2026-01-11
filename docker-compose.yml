@@ -1,4 +1,27 @@
 services:
+  # --- The Go Application ---
+  app:
+    container_name: prabogo_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_HOST=postgres
+      - CACHE_HOST=redis
+      - MESSAGE_HOST=rabbitmq
+      - APP_MODE=debug 
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
+    restart: on-failure
+    command: ["http"]
+
+  # --- Infrastructure Services ---
   redis:
     image: redis:7-alpine
     ports:
@@ -6,7 +29,7 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:-changeme}"]
+    command: ["redis-server", "--requirepass", "${CACHE_PASSWORD:-changeme}"]
 
   redisinsight:
     image: redislabs/redisinsight:latest
@@ -21,11 +44,12 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ~/apps/prabogo:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-      - POSTGRES_USER=${POSTGRES_USER:-prabogo}
-      - POSTGRES_DB=${POSTGRES_DB:-prabogo}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-changeme}
+      - POSTGRES_USER=${DATABASE_USERNAME:-prabogo}
+      - POSTGRES_DB=${DATABASE_NAME:-prabogo}
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:4.0-management
@@ -33,8 +57,10 @@ services:
       - 5672:5672
       - 15672:15672
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-prabogo}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-changeme}
+      RABBITMQ_DEFAULT_USER: ${MESSAGE_USER:-prabogo}
+      RABBITMQ_DEFAULT_PASS: ${MESSAGE_PASSWORD:-changeme}
+    restart: unless-stopped
 
 volumes:
   redis_data:
+  postgres_data:
