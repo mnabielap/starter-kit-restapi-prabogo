@@ -122,7 +122,6 @@ Forget manual Postman collections! This project comes with a comprehensive **Pyt
 
 ### Prerequisites
 *   Python 3.x
-*   `requests` library (`pip install requests`)
 
 ### How to Run Tests
 Navigate to the `api_tests` folder and run the scripts sequentially. They automatically handle token management (saving tokens to `secrets.json`).
